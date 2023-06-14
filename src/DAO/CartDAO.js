@@ -8,12 +8,11 @@ class CarritoManager {
     async getAllCarts(){
         let carritos;
         try{
-            carritos = await this.model.find();
+            carritos = await this.model.find().exec();
+            return carritos;
         } catch (error){
         throw error;
-        console.log(error);
     }
-    return carritos;
 }
 }
 

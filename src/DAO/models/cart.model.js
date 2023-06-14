@@ -7,6 +7,6 @@ const CarritoSchema = new mongoose.Schema({
         type: Array,
         required: true
     }
-})
+}, { versionKey: false })
 
 export const carritoModel = mongoose.model(carritosCollection, CarritoSchema)

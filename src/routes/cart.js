@@ -1,7 +1,8 @@
 import { Router } from "express";
 import CartManager from "../datos/CartManager.js";
-import CarritoManager from "../DAO/UserDAO.js";
+import CarritoManager from "../DAO/CartDAO.js";
 const cartRouter = Router();
+
 
 const cartManager = new CartManager();
 const cartManager2 = new CarritoManager();
@@ -11,10 +12,10 @@ cartRouter.get("/mon", async (req, res) => {
     let carritos;
     try{
         carritos = await cartManager2.getAllCarts();
-        res.send({status: "success", payload: carritos})
     } catch (error) {
-        res.status(404).send({ status: "error", error})
+        res.status(404).send({ error: "Internal Server Error", message: "No se han encontrado los carritos", details: error })
     }
+    res.send({status: "success", payload: carritos})
 })
 
 

@@ -27,6 +27,6 @@ const ProductosSchema = new mongoose.Schema({
         type: Number,
         required: true
     }
-})
+}, { versionKey: false })
 
 export const productsModel = mongoose.model(productosCollection, ProductosSchema)

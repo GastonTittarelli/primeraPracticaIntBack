@@ -2,6 +2,7 @@ import express from "express";
 import productRouter from "./src/routes/products.js";
 import cartRouter from "./src/routes/cart.js";
 import handlebars from "express-handlebars";
+import messagesRouter from "./src/routes/messages.js";
 import ProductManager from "./src/datos/ManagerProducts.js";
 import http from "http";
 import mongoose from "mongoose";
@@ -11,9 +12,7 @@ const manager = new ProductManager();
 
 const app = express();
 
-mongoose.connect('mongodb+srv://g:proyecto321@proyecto.veaq7ux.mongodb.net/proyect?retryWrites=true&w=majority');
-    // .then(() => console.log("Conectado a Mongo"))
-    // .catch((error) => console.log(error));
+mongoose.connect('mongodb+srv://g:proyecto321@proyecto.veaq7ux.mongodb.net/ecommerce?retryWrites=true&w=majority');
 
 
 const serve = http.Server(app);
@@ -29,6 +28,7 @@ app.use(express.static("public"));
 
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/messages", messagesRouter);
 
 
 app.get("/hbs", async (req, res) => {

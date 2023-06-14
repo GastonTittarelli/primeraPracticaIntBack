@@ -1,9 +1,8 @@
 import { Router, json } from "express";
 import ProductManager from "../datos/ManagerProducts.js";
 import { validateProduct } from "../utils/index.js";
-import ProductoManager from "../DAO/UserDAO.js";
+import ProductoManager from "../DAO/ProductDAO.js";
 const productRouter = Router();
-
 
 const manager = new ProductManager();
 const manager2 = new ProductoManager();
@@ -14,20 +13,9 @@ productRouter.get("/mon", async (req, res) => {
     try{
         productos = await manager2.getAllProducts();
     } catch (error) {
-        res.status(404).send({ status: "error", error})
+        res.status(404).send({ error: "Internal Server Error", message: "No se han encontrado los productos", details: error })
     }
-    let products = productos.map(elem => {
-        return {
-            title: elem.title,
-            description: elem.description,
-            price: elem.price,
-            thumbnail: elem.thumbnail,
-            code: elem.code,
-            stock: elem.stock,
-        }
-    })
-
-    res.render("productos", {products} )
+    res.send({status: "success", payload: productos})
 })
 
 
@@ -38,12 +26,12 @@ productRouter.get("/:pid", async (req, res) => {
         producto = await manager2.getProductById(pid);
         res.send({status: "success", payload: producto})
     } catch (error) {
-        res.status(404).send({ status: "error", error})
+        res.status(404).send({ error: "Internal Server Error", message: "El producto con ese Id no se encuentra", details: error })
     }
 })
 
 
-productRouter.post("/", async (req, res) => {
+productRouter.post("/mon", async (req, res) => {
     let response;
     let { title, description, price, thumbnail, code, stock } = req.body;
     if(!title || !description || !price || !thumbnail || !code || !stock){
@@ -53,22 +41,23 @@ productRouter.post("/", async (req, res) => {
         response = await manager2.addProduct(title, description, price, thumbnail, code, stock);
         res.send({status: "success", payload: response})
     } catch (error){
-        res.status(500).send({ status: "error", error})
+        res.status(500).send({ error: "Internal Server Error", message: "Error al añadir el producto", details: error })
     }
 })
 
 productRouter.put("/:pid", async (req, res) => {
     let pid = req.params.pid;
     let { title, description, price, thumbnail, code, stock } = req.body;
-    if(!title || !description || !price || !thumbnail || !code || !stock) return res.send({ status: "error", message: "producto incompleto" })
-        let productoUpdated;
-        try{
-            productoUpdated = await manager2.updateProduct(pid, {title, description, price, thumbnail, code, stock});
-            res.send({status: "success", payload: productoUpdated})
+
+    if(!title || !description || !price || !thumbnail || !code || !stock){
+        return res.status(400).send({ error: "Bad Request", message: "Producto incompleto" });
+    } 
+    try{
+        let productoUpdated = await manager2.updateProduct(pid, { title, description, price, thumbnail, code, stock });
+        res.send({ status: "success", payload: productoUpdated });
         } catch (error){
-            res.status(500).send({ status: "error", error})
+            res.status(500).send({ error: "Internal Server Error", message: "Error al actualizar el producto", details: error });
         }
-    
 })
 
 // productos obtenidos de memoria (json)
@@ -88,16 +77,16 @@ productRouter.get("/:pid", async (req, res) => {
     res.send(producto);
 })
 
-// productRouter.post("/", async (req, res) => {
-//     let product = req.body;
-//     if (!validateProduct(product)){
-//         res.status(400).send({ status: "error", message: "producto incompleto" })
-//     }
-//     product.id = await manager.getNextId();
-//     product.status = true;
-//     await manager.addProduct(product);
-//     res.send({ status: "success", message: "producto agregado" })
-// })
+productRouter.post("/", async (req, res) => {
+    let product = req.body;
+    if (!validateProduct(product)){
+        res.status(400).send({ status: "error", message: "producto incompleto" })
+    }
+    product.id = await manager.getNextId();
+    product.status = true;
+    await manager.addProduct(product);
+    res.send({ status: "success", message: "producto agregado" })
+})
 
 productRouter.put("/:pid", async (req, res) => {
     let pid = req.params.pid;
